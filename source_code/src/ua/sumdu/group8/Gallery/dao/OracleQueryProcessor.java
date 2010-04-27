@@ -28,7 +28,6 @@ public class OracleQueryProcessor implements IQueryProcessor {
                     + dataSourceName);
             if (ds != null) {
                 result = ds.getConnection();
-                result.AutoCommit(false);
             } else {
                 throw new DataAccessException("Failed to lookup datasource.");
             }
@@ -58,23 +57,13 @@ public class OracleQueryProcessor implements IQueryProcessor {
         Connection con = this.getConnection();
         PreparedStatement pst = con.prepareStatement(
                 GallerySQLConstants.ST_ADD_CAT);
-        if(cat.getParent() != GallerySQLConstants.ROOT) {
-            pst.setInt(1, cat.getParent());
-        } else {
-            pst.setNull(1, Types.INTEGER);
-        }
+        pst.setInt(1, cat.getParent());
         pst.setString(2, cat.getName());
-        if (cat.getDescription() != null) {
-            pst.setString(3, cat.getDescription());
-        } else {
-            pst.setNull(3, Types.VARCHAR);
-        }
+        pst.setString(3, cat.getDescription());
         try {
             pst.executeUpdate();
-            con.commit();
         } catch (SQLException ex) {
-            con.rollback();
-            throw new DataAccessException("Catalogue adding error.", ex);
+            throw new DataAccessException("Database usage error.", ex);
         } finally {
             try {
                 con.close();
@@ -95,24 +84,14 @@ public class OracleQueryProcessor implements IQueryProcessor {
         Connection con = this.getConnection();
         PreparedStatement pst = con.prepareStatement(
                 GallerySQLConstants.ST_ADD_PIC);
-        if(pic.getCatalogue() != GallerySQLConstants.ROOT) {
-            pst.setInt(1, pic.getCatalogue());
-        } else {
-            pst.setNull(1, Types.INTEGER);
-        }
+        pst.setInt(1, pic.getCatalogue());
         pst.setString(2, pic.getName());
         pst.setString(3, pic.getURL());
-        if (pic.getDescription() != null) {
-            pst.setString(4, pic.getDescription());
-        } else {
-            pst.setNull(4, Types.VARCHAR);
-        }
+        pst.setString(4, pic.getDescription());
         try {
             pst.executeUpdate();
-            con.commit();
         } catch (SQLException ex) {
-            con.rollback();
-            throw new DataAccessException("Picture adding error.", ex);
+            throw new DataAccessException("Database usage error.", ex);
         } finally {
             try {
                 con.close();
@@ -139,24 +118,20 @@ public class OracleQueryProcessor implements IQueryProcessor {
      * @param id an ID to find.
      * @exception DataAccessException .
      */
-    public int delPictureByID(int id) throws DataAccessException {
-        int res = 0;
+    public IGalleryPicture delPictureByID(int id) throws DataAccessException {
         IGalleryPicture pic = null;
         pic = getPictureByID(id);
         if(pic == null) {
-            return 0;
+            return pic;
         }
         Connection con = this.getConnection();
         PreparedStatement pst = con.prepareStatement(
                 GallerySQLConstants.ST_DEL_PIC);
         pst.setInt(1, pic.getID());
         try {
-            res = pst.executeUpdate();
-            con.commit();
-            // physically files deleting logics
+            pst.executeUpdate();
         } catch (SQLException ex) {
-            con.rollback();
-            throw new DataAccessException("Picture removing error.", ex);
+            throw new DataAccessException("Database usage error.", ex);
         } finally {
             try {
                 con.close();
@@ -164,7 +139,7 @@ public class OracleQueryProcessor implements IQueryProcessor {
                 throw new DataAccessException("Connection closing error.", ex);
             }
         }
-        return res;
+        return pic;
     }
 
     /**
@@ -179,19 +154,24 @@ public class OracleQueryProcessor implements IQueryProcessor {
         ResultSet rs = null;
         Connection con = this.getConnection();
         PreparedStatement pst = con.prepareStatement(
-                GallerySQLConstants.ST_DEL_PIC);
-        pst.setInt(1, pic.getID());
+                GallerySQLConstants.ST_GET_CAT_BY_ID);
+        pst.setInt(1, id);
         try {
             rs = pst.executeQuery();
             if(!rs.next()) {
                 return null;
             } else {
-                
+                cat = new GalleryCatalogue();
+                cat.setID(rs.getInt(GallerySQLConstants.COL_ID));
+                cat.setParent(rs.getInt(GallerySQLConstants.COL_PARENT));
+                cat.setName(rs.getString(GallerySQLConstants.COL_NAME));
+                cat.setDescription(rs.getString(GallerySQLConstants.COL_DESC));
             }
         } catch (SQLException ex) {
-            throw new DataAccessException("Picture removing error.", ex);
+            throw new DataAccessException("Database usage error.", ex);
         } finally {
             try {
+                rs.close();
                 con.close();
             } catch (SQLException ex) {
                 throw new DataAccessException("Connection closing error.", ex);
@@ -204,22 +184,98 @@ public class OracleQueryProcessor implements IQueryProcessor {
      * Finds catalogues with specified name.
      * 
      * @param name a name to find.
+     * @param sort a sorting order by name.
      * @exception DataAccessException .
      */
-    public List getCataloguesByName(String name) throws DataAccessException {
-        return null;
+    public List getCataloguesByName(String name, int sort) 
+            throws DataAccessException {
+        IGalleryCatalogue cat = null;
+        ResultSet rs = null;
+        List res = null;
+        String query = GallerySQLConstants.ST_GET_CAT_BY_NAME;
+        if(sort == GallerySQLConstants.SORT_ASC) {
+            query += GallerySQLConstants.ORDER_NAME_ASC;
+        } else if(sort == GallerySQLConstants.SORT_DESC) {
+            query += GallerySQLConstants.ORDER_NAME_DESC;
+        }
+        Connection con = this.getConnection();
+        PreparedStatement pst = con.prepareStatement(query);
+        pst.setString(1, name);
+        try {
+            rs = pst.executeQuery();
+            if(!rs.next()) {
+                return null;
+            } else {
+                res = new LinkedList();
+                do {
+                    cat = new GalleryCatalogue();
+                    cat.setID(rs.getInt(GallerySQLConstants.COL_ID));
+                    cat.setParent(rs.getInt(GallerySQLConstants.COL_PARENT));
+                    cat.setName(rs.getString(GallerySQLConstants.COL_NAME));
+                    cat.setDescription(rs.getString(GallerySQLConstants.COL_DESC));
+                    res.add(cat);
+                } while(rs.next());
+            }
+        } catch (SQLException ex) {
+            throw new DataAccessException("Database usage error.", ex);
+        } finally {
+            try {
+                rs.close();
+                con.close();
+            } catch (SQLException ex) {
+                throw new DataAccessException("Connection closing error.", ex);
+            }
+        }
+        return res;
     }
 
     /**
      * Finds catalogues having their parent catalogue ID equals to specified.
      * 
-     * @param sort sorting order.
      * @param id a parent ID to find.
+     * @param sort a sorting order by name.
      * @exception DataAccessException .
      */
-    public List getCataloguesByParent(int sort, int id)
+    public List getCataloguesByParent(int id, int sort)
             throws DataAccessException{
-        return null;
+        IGalleryCatalogue cat = null;
+        ResultSet rs = null;
+        List res = null;
+        String query = GallerySQLConstants.ST_GET_CAT_BY_PARENT;
+        if(sort == GallerySQLConstants.SORT_ASC) {
+            query += GallerySQLConstants.ORDER_NAME_ASC;
+        } else if(sort == GallerySQLConstants.SORT_DESC) {
+            query += GallerySQLConstants.ORDER_NAME_DESC;
+        }
+        Connection con = this.getConnection();
+        PreparedStatement pst = con.prepareStatement(query);
+        pst.setInt(1, id);
+        try {
+            rs = pst.executeQuery();
+            if(!rs.next()) {
+                return null;
+            } else {
+                res = new LinkedList();
+                do {
+                    cat = new GalleryCatalogue();
+                    cat.setID(rs.getInt(GallerySQLConstants.COL_ID));
+                    cat.setParent(rs.getInt(GallerySQLConstants.COL_PARENT));
+                    cat.setName(rs.getString(GallerySQLConstants.COL_NAME));
+                    cat.setDescription(rs.getString(GallerySQLConstants.COL_DESC));
+                    res.add(cat);
+                } while(rs.next());
+            }
+        } catch (SQLException ex) {
+            throw new DataAccessException("Database usage error.", ex);
+        } finally {
+            try {
+                rs.close();
+                con.close();
+            } catch (SQLException ex) {
+                throw new DataAccessException("Connection closing error.", ex);
+            }
+        }
+        return res;
     }
 
     /**
@@ -229,29 +285,135 @@ public class OracleQueryProcessor implements IQueryProcessor {
      * @exception DataAccessException .
      */
     public IGalleryPicture getPictureByID(int id) throws DataAccessException {
-        return null;
+        IGalleryPicture pic = null;
+        ResultSet rs = null;
+        Connection con = this.getConnection();
+        PreparedStatement pst = con.prepareStatement(
+                GallerySQLConstants.ST_GET_PIC_BY_ID);
+        pst.setInt(1, id);
+        try {
+            rs = pst.executeQuery();
+            if(!rs.next()) {
+                return null;
+            } else {
+                pic = new GalleryPicture();
+                pic.setID(rs.getInt(GallerySQLConstants.COL_ID));
+                pic.setCatalogue(rs.getInt(GallerySQLConstants.COL_CAT));
+                pic.setName(rs.getString(GallerySQLConstants.COL_NAME));
+                pic.setURL(rs.getString(GallerySQLConstants.COL_URL));
+                pic.setDescription(rs.getString(GallerySQLConstants.COL_DESC));
+            }
+        } catch (SQLException ex) {
+            throw new DataAccessException("Database usage error.", ex);
+        } finally {
+            try {
+                rs.close();
+                con.close();
+            } catch (SQLException ex) {
+                throw new DataAccessException("Connection closing error.", ex);
+            }
+        }
+        return pic;
     }
 
     /**
      * Finds pictures with specified name.
      * 
      * @param name a name to find.
+     * @param sort a sorting order by name.
      * @exception DataAccessException .
      */
-    public List getPicturesByName(String name) throws DataAccessException {
-        return null;
+    public List getPicturesByName(String name, int sort) 
+            throws DataAccessException {
+        IGalleryPicture pic = null;
+        ResultSet rs = null;
+        List res = null;
+        String query = GallerySQLConstants.ST_GET_PIC_BY_NAME;
+        if(sort == GallerySQLConstants.SORT_ASC) {
+            query += GallerySQLConstants.ORDER_NAME_ASC;
+        } else if(sort == GallerySQLConstants.SORT_DESC) {
+            query += GallerySQLConstants.ORDER_NAME_DESC;
+        }
+        Connection con = this.getConnection();
+        PreparedStatement pst = con.prepareStatement(query);
+        pst.setString(1, name);
+        try {
+            rs = pst.executeQuery();
+            if(!rs.next()) {
+                return null;
+            } else {
+                res = new LinkedList();
+                do {
+                    pic = new GalleryPicture();
+                    pic.setID(rs.getInt(GallerySQLConstants.COL_ID));
+                    pic.setCatalogue(rs.getInt(GallerySQLConstants.COL_CAT));
+                    pic.setName(rs.getString(GallerySQLConstants.COL_NAME));
+                    pic.setURL(rs.getString(GallerySQLConstants.COL_URL));
+                    pic.setDescription(rs.getString(GallerySQLConstants.COL_DESC));
+                    res.add(pic);
+                } while(rs.next());
+            }
+        } catch (SQLException ex) {
+            throw new DataAccessException("Database usage error.", ex);
+        } finally {
+            try {
+                rs.close();
+                con.close();
+            } catch (SQLException ex) {
+                throw new DataAccessException("Connection closing error.", ex);
+            }
+        }
+        return res;
     }
 
     /**
      * Returns all pictures placed into catalogue with specified ID.
      * 
-     * @param sort sorting order.
      * @param id a catalogue ID.
+     * @param sort a sorting order by name.
      * @exception DataAccessException .
      */
-    public List getPicturesFromCat(int sort, int id)
+    public List getPicturesFromCat(int id, int sort)
             throws DataAccessException {
-        return null;
+        IGalleryPicture pic = null;
+        ResultSet rs = null;
+        List res = null;
+        String query = GallerySQLConstants.ST_GET_PIC_BY_CAT;
+        if(sort == GallerySQLConstants.SORT_ASC) {
+            query += GallerySQLConstants.ORDER_NAME_ASC;
+        } else if(sort == GallerySQLConstants.SORT_DESC) {
+            query += GallerySQLConstants.ORDER_NAME_DESC;
+        }
+        Connection con = this.getConnection();
+        PreparedStatement pst = con.prepareStatement(query);
+        pst.setInt(1, id);
+        try {
+            rs = pst.executeQuery();
+            if(!rs.next()) {
+                return null;
+            } else {
+                res = new LinkedList();
+                do {
+                    pic = new GalleryPicture();
+                    pic.setID(rs.getInt(GallerySQLConstants.COL_ID));
+                    pic.setCatalogue(rs.getInt(GallerySQLConstants.COL_CAT));
+                    pic.setName(rs.getString(GallerySQLConstants.COL_NAME));
+                    pic.setURL(rs.getString(GallerySQLConstants.COL_URL));
+                    pic.setDescription(rs.getString(GallerySQLConstants.COL_DESC));
+                    res.add(pic);
+                } while(rs.next());
+            }
+        } catch (SQLException ex) {
+            throw new DataAccessException("Database usage error.", ex);
+        } finally {
+            try {
+                rs.close();
+                con.close();
+            } catch (SQLException ex) {
+                throw new DataAccessException("Connection closing error.", ex);
+            }
+        }
+        return res;
     }
 
     /**
@@ -259,47 +421,33 @@ public class OracleQueryProcessor implements IQueryProcessor {
      * @exception DataAccessException .
      */
     public IGalleryCatalogue getRoot() throws DataAccessException {
-        return null;
-    }
-
-    /**
-     * Opens needed connections and prepares data storage for work.
-     * @exception DataAccessException .
-     */
-    public void open() throws DataAccessException {
-        Connection con = null;
+        IGalleryCatalogue cat = null;
+        ResultSet rs = null;
+        Connection con = this.getConnection();
+        PreparedStatement pst = con.prepareStatement(
+                GallerySQLConstants.ST_GET_ROOT);
         try {
-            Class.forName(options.getDriverClass());
-            con = DriverManager.getConnection(options.getConnectionURL(), 
-                options.getUserName(), options.getPasword());
-            st_add_cat = 
-            st_add_pic = con.prepareStatement(GallerySQLConstants.ST_ADD_PIC);
-            st_del_cat = con.prepareStatement(GallerySQLConstants.ST_DEL_CAT);
-            st_del_pic = con.prepareStatement(GallerySQLConstants.ST_DEL_PIC);
-            st_upd_cat = con.prepareStatement(GallerySQLConstants.ST_UPD_CAT);
-            st_upd_pic = con.prepareStatement(GallerySQLConstants.ST_UPD_PIC);
-            st_get_cat_by_id = con.prepareStatement(
-                    GallerySQLConstants.ST_GET_CAT_BY_ID);
-            st_get_cat_by_name = con.prepareStatement(
-                    GallerySQLConstants.ST_GET_CAT_BY_NAME);
-            st_get_cat_by_parent = con.prepareStatement(
-                    GallerySQLConstants.ST_GET_CAT_BY_PARENT);
-            st_get_pic_by_id = con.prepareStatement(
-                    GallerySQLConstants.ST_GET_PIC_BY_ID);
-            st_get_pic_by_name = con.prepareStatement(
-                    GallerySQLConstants.ST_GET_PIC_BY_NAME);
-            st_get_pic_by_cat = con.prepareStatement(
-                    GallerySQLConstants.ST_GET_PIC_BY_CAT);
-            st_get_root = con.prepareStatement(GallerySQLConstants.ST_GET_ROOT);
-        } catch (ExceptionInInitializerError ex) {
-            throw new DataAccessException("Initialization failed.", ex);
-        } catch (LinkageError ex) {
-            throw new DataAccessException("Linkage failed.", ex);
-        } catch (ClassNotFoundException ex) {
-            throw new DataAccessException("No driver class found.", ex);
+            rs = pst.executeQuery();
+            if(!rs.next()) {
+                return null;
+            } else {
+                cat = new GalleryCatalogue();
+                cat.setID(rs.getInt(GallerySQLConstants.COL_ID));
+                cat.setParent(rs.getInt(GallerySQLConstants.COL_PARENT));
+                cat.setName(rs.getString(GallerySQLConstants.COL_NAME));
+                cat.setDescription(rs.getString(GallerySQLConstants.COL_DESC));
+            }
         } catch (SQLException ex) {
-            throw new DataAccessException("Database using error.", ex);
+            throw new DataAccessException("Database usage error.", ex);
+        } finally {
+            try {
+                rs.close();
+                con.close();
+            } catch (SQLException ex) {
+                throw new DataAccessException("Connection closing error.", ex);
+            }
         }
+        return cat;
     }
 
     /**
@@ -310,7 +458,7 @@ public class OracleQueryProcessor implements IQueryProcessor {
      */
     public int updateCatalogue(IGalleryCatalogue cat)
             throws DataAccessException {
-
+        
     }
 
     /**

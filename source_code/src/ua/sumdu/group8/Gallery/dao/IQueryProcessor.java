@@ -42,7 +42,7 @@ public interface IQueryProcessor {
      * @param id an ID to find.
      * @exception DataAccessException.
      */
-    public int delPictureByID(int id) throws DataAccessException;
+    public IGalleryPicture delPictureByID(int id) throws DataAccessException;
 
     /**
      * Finds a catalogue with specified ID. 
@@ -56,18 +56,21 @@ public interface IQueryProcessor {
      * Finds catalogues with specified name. 
      *
      * @param name a name to find.
+     * @param sort a sorting order by name.
      * @exception DataAccessException.
      */
-    public List getCataloguesByName(String name) throws DataAccessException;
+    public List getCataloguesByName(String name, int sort) 
+            throws DataAccessException;
 
     /**
      * Finds catalogues having their parent catalogue ID equals to specified. 
      *
-     * @param sort sorting order.
      * @param id a parent ID to find.
+     * @param sort a sorting order by name.
      * @exception DataAccessException.
      */
-    public List getCataloguesByParent(int sort, int id) throws DataAccessException;
+    public List getCataloguesByParent(int id, int sort) 
+            throws DataAccessException;
 
     /**
      * Finds a picture with specified ID.
@@ -81,18 +84,20 @@ public interface IQueryProcessor {
      * Finds pictures with specified name. 
      *
      * @param name a name to find.
+     * @param sort a sorting order by name.
      * @exception DataAccessException.
      */
-    public List getPicturesByName(String name) throws DataAccessException;
+    public List getPicturesByName(String name, int sort) 
+            throws DataAccessException;
 
     /**
      * Returns all pictures placed into catalogue with specified ID.
      * 
-     * @param sort sorting order.
      * @param id a catalogue ID.
+     * @param sort a sorting order by name.
      * @exception DataAccessException.
      */
-    public List getPicturesFromCat(int sort, int id) throws DataAccessException;
+    public List getPicturesFromCat(int id, int sort) throws DataAccessException;
 
     /**
      * Returns a <code>root</code> catalogue.
