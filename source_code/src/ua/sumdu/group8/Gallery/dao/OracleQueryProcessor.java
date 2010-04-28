@@ -233,19 +233,49 @@ public class OracleQueryProcessor implements IQueryProcessor {
      * @exception DataAccessException .
      */
     public int delCatalogueByID(int id) throws DataAccessException {
-        
-        return 0;
+        int res = 0;
+        List subcats = getCataloguesByParent(id);
+        IGalleryCatalogue cat = null;
+        if(subcats != null) {
+            for(Iterator it=subcats.iterator();it.hasNext();) {
+                cat = (IGalleryCatalogue) it.next();
+                delCatalogueByID(cat.getID());
+            }
+        }
+        List pictures = getPicturesFromCat(id);
+        if(pictures != null) {
+            IGalleryPicture pic = null;
+            for(Iterator it=pictures.iterator();it.hasNext();) {
+                pic = (IGalleryPicture) it.next();
+                delPictureByID(pic.getID());
+            }
+        }
+        Connection con = this.getConnection();
+        PreparedStatement pst = con.prepareStatement(
+                GallerySQLConstants.ST_DEL_CAT);
+        pst.setInt(1, id);
+        try {
+            res = pst.executeUpdate();
+        } catch (SQLException ex) {
+            throw new DataAccessException("Database usage error.", ex);
+        } finally {
+            try {
+                con.close();
+            } catch (SQLException ex) {
+                throw new DataAccessException("Connection closing error.", ex);
+            }
+        }
+        return res;
     }
 
     /**
      * Removes a picture with specified ID.
      * 
      * @param id an ID to find.
-     * @return removed picture object or <code>null</code> if nothing 
-     *         was deleted.
+     * @return number of matching objects actually deleted.
      * @exception DataAccessException .
      */
-    public IGalleryPicture delPictureByID(int id) throws DataAccessException {
+    public int delPictureByID(int id) throws DataAccessException {
         IGalleryPicture pic = null;
         pic = getPictureByID(id);
         if(pic == null) {

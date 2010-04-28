@@ -29,45 +29,52 @@ public interface IQueryProcessor {
     public void addPicture(IGalleryPicture pic) throws DataAccessException;
 
     /**
-     * Removes a catalogue with specified ID. 
-     *
+     * Removes a catalogue with specified ID.
+     * All subcatalogues and pictures within specified catalogue are deleted
+     * too.
+     * 
      * @param id an ID to find.
-     * @exception DataAccessException.
+     * @return number of matching objects actually deleted.
+     * @exception DataAccessException .
      */
     public int delCatalogueByID(int id) throws DataAccessException;
 
     /**
-     * Removes a picture with specified ID. 
-     *
+     * Removes a picture with specified ID.
+     * 
      * @param id an ID to find.
-     * @exception DataAccessException.
+     * @return number of matching objects actually deleted.
+     * @exception DataAccessException .
      */
-    public IGalleryPicture delPictureByID(int id) throws DataAccessException;
+    public int delPictureByID(int id) throws DataAccessException;
 
     /**
-     * Finds a catalogue with specified ID. 
-     *
+     * Finds a catalogue with specified ID.
+     * 
      * @param id an ID to find.
-     * @exception DataAccessException.
+     * @return matching catalogue object or <code>null</code> if nothing found.
+     * @exception DataAccessException .
      */
     public IGalleryCatalogue getCatalogueByID(int id) throws DataAccessException;
 
     /**
-     * Finds catalogues with specified name. 
-     *
+     * Finds catalogues with specified name.
+     * 
      * @param name a name to find.
      * @param sort a sorting order by name.
+     * @return matching catalogues list or <code>null</code> if nothing found.
      * @exception DataAccessException.
      */
     public List getCataloguesByName(String name, int sort) 
             throws DataAccessException;
 
     /**
-     * Finds catalogues having their parent catalogue ID equals to specified. 
-     *
+     * Finds catalogues having their parent catalogue ID equals to specified.
+     * 
      * @param id a parent ID to find.
      * @param sort a sorting order by name.
-     * @exception DataAccessException.
+     * @return matching catalogues list or <code>null</code> if nothing found.
+     * @exception DataAccessException .
      */
     public List getCataloguesByParent(int id, int sort) 
             throws DataAccessException;
@@ -76,16 +83,18 @@ public interface IQueryProcessor {
      * Finds a picture with specified ID.
      * 
      * @param id an ID to find.
-     * @exception DataAccessException.
+     * @return matching picture object or <code>null</code> if nothing found.
+     * @exception DataAccessException .
      */
     public IGalleryPicture getPictureByID(int id) throws DataAccessException;
 
     /**
-     * Finds pictures with specified name. 
-     *
+     * Finds pictures with specified name.
+     * 
      * @param name a name to find.
      * @param sort a sorting order by name.
-     * @exception DataAccessException.
+     * @return matching pictures list or <code>null</code> if nothing found.
+     * @exception DataAccessException .
      */
     public List getPicturesByName(String name, int sort) 
             throws DataAccessException;
@@ -95,30 +104,34 @@ public interface IQueryProcessor {
      * 
      * @param id a catalogue ID.
      * @param sort a sorting order by name.
-     * @exception DataAccessException.
+     * @return matching pictures list or <code>null</code> if nothing found.
+     * @exception DataAccessException .
      */
     public List getPicturesFromCat(int id, int sort) throws DataAccessException;
 
     /**
      * Returns a <code>root</code> catalogue.
      *
-     * @exception DataAccessException.
+     * @return root catalogue object or <code>null</code> if nothing found.
+     * @exception DataAccessException .
      */
     public IGalleryCatalogue getRoot() throws DataAccessException;
 
     /**
-     * Updates specified catalogue. 
-     *
+     * Updates specified catalogue.
+     * 
      * @param cat a catalogue to update.
+     * @return count of actually updated objects.
      * @exception DataAccessException.
      */
     public int updateCatalogue(IGalleryCatalogue cat) throws DataAccessException;
 
     /**
      * Updates specified picture.
-     *
+     * 
      * @param pic a picture to update.
-     * @exception DataAccessException.
+     * @return count of actually updated objects.
+     * @exception DataAccessException .
      */
     public int updatePicture(IGalleryPicture pic) throws DataAccessException;
 
