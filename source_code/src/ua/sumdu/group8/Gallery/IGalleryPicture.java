@@ -35,7 +35,7 @@ public interface IGalleryPicture {
     /**
      * Returns a URL for this picture.
      */
-    public URL getURL();
+    public String getURL();
 
     /**
      * Sets a parent catalogue for this picture. 
@@ -70,7 +70,7 @@ public interface IGalleryPicture {
      *
      * @param url a new URL.
      */
-    public void setURL(URL url);
+    public void setURL(String url);
     
     /**
      * Returns hash code for this picture.

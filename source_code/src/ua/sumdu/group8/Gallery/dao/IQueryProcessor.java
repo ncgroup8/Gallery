@@ -1,6 +1,7 @@
 package ua.sumdu.group8.Gallery.dao;
 
 import ua.sumdu.group8.Gallery.dao.exceptions.*;
+import ua.sumdu.group8.Gallery.*;
 import java.util.List;
 
 /**

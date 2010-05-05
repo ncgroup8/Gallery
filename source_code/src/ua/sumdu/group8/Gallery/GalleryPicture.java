@@ -13,7 +13,7 @@ public class GalleryPicture implements IGalleryPicture {
     private String desc = "";
     private int id = 0;
     private String name = "";
-    private URL url = "";
+    private String url = "";
 
     /**
      * Creates an empty <code>GalleryPicture</code> object with no 
@@ -32,7 +32,7 @@ public class GalleryPicture implements IGalleryPicture {
      * @param name a picture name.
      * @param desc a picture description.
      */
-    public GalleryPicture(int id, int catID, URL url, String name, String desc) {
+    public GalleryPicture(int id, int catID, String url, String name, String desc) {
         this.id = id;
         this.cat = catID;
         this.name = name;
@@ -74,7 +74,7 @@ public class GalleryPicture implements IGalleryPicture {
     /**
      * Returns a URL for this picture.
      */
-    public URL getURL() {
+    public String getURL() {
         return url;
     }
 
@@ -119,7 +119,7 @@ public class GalleryPicture implements IGalleryPicture {
      *
      * @param url a new URL.
      */
-    public void setURL(URL url) {
+    public void setURL(String url) {
         this.url = url;
     }
     
@@ -132,7 +132,7 @@ public class GalleryPicture implements IGalleryPicture {
      */
     public int hashCode() {
         long res = new Integer( getID() ).hashCode();
-        res += new Integer( getGatalogue() ).hashCode();
+        res += new Integer( getCatalogue() ).hashCode();
         res += getName().hashCode();
         res += getURL().hashCode();
         res += getDescription().hashCode();

@@ -2,8 +2,10 @@ package ua.sumdu.group8.Gallery.dao;
 
 import ua.sumdu.group8.Gallery.dao.exceptions.*;
 import ua.sumdu.group8.Gallery.*;
+import javax.naming.*;
 import java.util.*;
 import java.sql.*;
+import javax.sql.*; 
 
 /**
  * Provides common methods to access gallery data storage based on
@@ -15,7 +17,6 @@ import java.sql.*;
  */
 public class OracleQueryProcessor implements IQueryProcessor {
 
-    private String dataSourceName = null;
     private final static int ACT_GET_PIC_BY_ID = 1;
     private final static int ACT_GET_PIC_BY_NAME = 2;
     private final static int ACT_GET_PIC_BY_CAT = 3;
@@ -24,9 +25,9 @@ public class OracleQueryProcessor implements IQueryProcessor {
     private final static int ACT_GET_CAT_BY_PARENT = 12;
     private final static int ACT_GET_ROOT = 13;
     private final static int ACT_ADD_CAT = 21;
-    private final static int ACT_UPD_CAT = 21;
+    private final static int ACT_UPD_CAT = 22;
     private final static int ACT_ADD_PIC = 31;
-    private final static int ACT_UPD_PIC = 31;
+    private final static int ACT_UPD_PIC = 32;
     
     /**
      * Returns a connection to specified datasource.
@@ -38,8 +39,7 @@ public class OracleQueryProcessor implements IQueryProcessor {
             if (ctx == null) {
                 throw new DataAccessException("Cannot get InitialContext.");
             }
-            DataSource ds = (DataSource) ctx.lookup("java:comp/env/" 
-                    + dataSourceName);
+            DataSource ds = (DataSource) ctx.lookup(GalleryConstants.DATASOURCE);
             if (ds != null) {
                 result = ds.getConnection();
             } else {
@@ -73,27 +73,27 @@ public class OracleQueryProcessor implements IQueryProcessor {
         IGalleryCatalogue cat = null;
         IGalleryPicture pic = null;
         ResultSet rs = null;
-        List res = null;
         if(sort == GallerySQLConstants.SORT_ASC) {
             query += GallerySQLConstants.ORDER_NAME_ASC;
         } else if(sort == GallerySQLConstants.SORT_DESC) {
             query += GallerySQLConstants.ORDER_NAME_DESC;
         }
-        PreparedStatement pst = con.prepareStatement(query);
-        switch(action) {
-            case ACT_GET_CAT_BY_ID: 
-            case ACT_GET_CAT_BY_PARENT:
-            case ACT_GET_PIC_BY_CAT:
-            case ACT_GET_PIC_BY_ID:
-                pst.setInt(1,id);
-                break;
-                
-            case ACT_GET_CAT_BY_NAME:
-            case ACT_GET_PIC_BY_NAME:
-                pst.setString(1, name);
-                break;
-        }
+        PreparedStatement pst = null;
         try {
+            pst = con.prepareStatement(query);
+            switch(action) {
+                case ACT_GET_CAT_BY_ID: 
+                case ACT_GET_CAT_BY_PARENT:
+                case ACT_GET_PIC_BY_CAT:
+                case ACT_GET_PIC_BY_ID:
+                    pst.setInt(1,id);
+                    break;
+                    
+                case ACT_GET_CAT_BY_NAME:
+                case ACT_GET_PIC_BY_NAME:
+                    pst.setString(1, name);
+                    break;
+            }
             rs = pst.executeQuery();
             if(!rs.next()) {
                 return null;
@@ -151,33 +151,34 @@ public class OracleQueryProcessor implements IQueryProcessor {
      * @exception DataAccessException
      */
     private int processUpdate(IGalleryPicture pic, IGalleryCatalogue cat, 
-            String query, int action) {
+            String query, int action) throws DataAccessException {
         Connection con = this.getConnection();
-        PreparedStatement pst = con.prepareStatement(query);
+        PreparedStatement pst = null;
         int res = 0;
-        switch(action) {
-            case ACT_UPD_CAT:
-            case ACT_ADD_CAT:
-                pst.setInt(1, cat.getParent());
-                pst.setString(2, cat.getName());
-                pst.setString(3, cat.getDescription());
-                if(action == ACT_UPD_CAT) {
-                    pst.setInt(4, cat.getID());
-                }
-                break;
-                
-            case ACT_UPD_PIC:
-            case ACT_ADD_PIC:
-                pst.setInt(1, pic.getCatalogue());
-                pst.setString(2, pic.getName());
-                pst.setString(3, pic.getURL());
-                pst.setString(4, pic.getDescription());
-                if(action == ACT_UPD_PIC) {
-                    pst.setInt(5, pic.getID());
-                }
-                break;
-        }
         try {
+            pst = con.prepareStatement(query);
+            switch(action) {
+                case ACT_UPD_CAT:
+                case ACT_ADD_CAT:
+                    pst.setInt(1, cat.getParent());
+                    pst.setString(2, cat.getName());
+                    pst.setString(3, cat.getDescription());
+                    if(action == ACT_UPD_CAT) {
+                        pst.setInt(4, cat.getID());
+                    }
+                    break;
+                    
+                case ACT_UPD_PIC:
+                case ACT_ADD_PIC:
+                    pst.setInt(1, pic.getCatalogue());
+                    pst.setString(2, pic.getName());
+                    pst.setString(3, pic.getURL());
+                    pst.setString(4, pic.getDescription());
+                    if(action == ACT_UPD_PIC) {
+                        pst.setInt(5, pic.getID());
+                    }
+                    break;
+            }
             res = pst.executeUpdate();
         } catch (SQLException ex) {
             throw new DataAccessException("Database usage error.", ex);
@@ -197,8 +198,7 @@ public class OracleQueryProcessor implements IQueryProcessor {
      *
      * @param source a DataSource to connect to.
      */
-    public OracleQueryProcessor(String source) {
-        dataSourceName = source;
+    public OracleQueryProcessor() {
     }
 
     /**
@@ -234,7 +234,7 @@ public class OracleQueryProcessor implements IQueryProcessor {
      */
     public int delCatalogueByID(int id) throws DataAccessException {
         int res = 0;
-        List subcats = getCataloguesByParent(id);
+        List subcats = getCataloguesByParent(id, GallerySQLConstants.SORT_ASC);
         IGalleryCatalogue cat = null;
         if(subcats != null) {
             for(Iterator it=subcats.iterator();it.hasNext();) {
@@ -242,7 +242,7 @@ public class OracleQueryProcessor implements IQueryProcessor {
                 delCatalogueByID(cat.getID());
             }
         }
-        List pictures = getPicturesFromCat(id);
+        List pictures = getPicturesFromCat(id, GallerySQLConstants.SORT_ASC);
         if(pictures != null) {
             IGalleryPicture pic = null;
             for(Iterator it=pictures.iterator();it.hasNext();) {
@@ -251,10 +251,10 @@ public class OracleQueryProcessor implements IQueryProcessor {
             }
         }
         Connection con = this.getConnection();
-        PreparedStatement pst = con.prepareStatement(
-                GallerySQLConstants.ST_DEL_CAT);
-        pst.setInt(1, id);
         try {
+            PreparedStatement pst = con.prepareStatement(
+                GallerySQLConstants.ST_DEL_CAT);
+            pst.setInt(1, id);
             res = pst.executeUpdate();
         } catch (SQLException ex) {
             throw new DataAccessException("Database usage error.", ex);
@@ -277,18 +277,22 @@ public class OracleQueryProcessor implements IQueryProcessor {
      */
     public int delPictureByID(int id) throws DataAccessException {
         IGalleryPicture pic = null;
+        int res = 0;
         pic = getPictureByID(id);
         if(pic == null) {
-            return pic;
+            return 0;
         }
         Connection con = this.getConnection();
-        PreparedStatement pst = con.prepareStatement(
-                GallerySQLConstants.ST_DEL_PIC);
-        pst.setInt(1, pic.getID());
         try {
-            pst.executeUpdate();
+            PreparedStatement pst = con.prepareStatement(
+                GallerySQLConstants.ST_DEL_PIC);
+            pst.setInt(1, pic.getID());
+            res = pst.executeUpdate();
+            PictureStorage.getInstance().remove(pic);
         } catch (SQLException ex) {
             throw new DataAccessException("Database usage error.", ex);
+        } catch (PictureStorageException ex) {
+            throw new DataAccessException("Picture removing error.", ex);
         } finally {
             try {
                 con.close();
@@ -296,7 +300,7 @@ public class OracleQueryProcessor implements IQueryProcessor {
                 throw new DataAccessException("Connection closing error.", ex);
             }
         }
-        return pic;
+        return res;
     }
 
     /**
@@ -428,7 +432,7 @@ public class OracleQueryProcessor implements IQueryProcessor {
      */
     public int updatePicture(IGalleryPicture pic)
             throws DataAccessException {
-        return processUpdate(pci, null, GallerySQLConstants.ST_UPD_PIC, 
+        return processUpdate(pic, null, GallerySQLConstants.ST_UPD_PIC, 
                 ACT_UPD_PIC);
     }
 
