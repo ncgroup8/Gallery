@@ -33,7 +33,7 @@ public class GalleryCatalogue implements IGalleryCatalogue {
     public GalleryCatalogue(int id, int parent, String name, String desc) {
         this.desc = desc;
         this.name = name;
-        this.parentID = id;
+        this.parentID = parent;
         this.id = id;
     }
 

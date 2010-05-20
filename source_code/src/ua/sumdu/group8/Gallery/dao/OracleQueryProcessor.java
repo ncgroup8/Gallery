@@ -50,7 +50,7 @@ public class OracleQueryProcessor implements IQueryProcessor {
             throw new DataAccessException("Cannot get connection: ", ex);
         }
         catch(SQLException ex){
-            throw new DataAccessException("Database usage error: ", ex);
+            throw new DataAccessException("Database connection error: ", ex);
         }
         return result;
     }
@@ -104,6 +104,7 @@ public class OracleQueryProcessor implements IQueryProcessor {
                         case ACT_GET_CAT_BY_ID:
                         case ACT_GET_CAT_BY_NAME:
                         case ACT_GET_CAT_BY_PARENT:
+                        case ACT_GET_ROOT:
                             cat = new GalleryCatalogue();
                             cat.setID(rs.getInt(GallerySQLConstants.COL_ID));
                             cat.setParent(rs.getInt(GallerySQLConstants.COL_PARENT));
