@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="windows-1251"?>
+<project name="servlet" basedir="." default="dist">
+    <property name="name" location="Gallery"/>
+    <property name="war" value="Gallery"/>
+	<property name="src" location="src"/>
+	<property name="classes" location="classes"/>
+    <property name="xml" location="xml"/>
+    <property name="lib" location="lib"/>
+    <property name="jsp" location="jsp"/>
+    <property name="serv" location="D:\Develop\Java\TomCat4"/>
+    
+	<target name="clean">
+        <echo message="Cleaning"/>
+		<delete dir="${classes}"/>
+        <delete file="${name}.war"/>
+	</target>
+
+	<target name="init" depends="clean">
+        <echo message="Initializing"/>
+		<mkdir dir="${classes}"/>
+	</target>
+
+	<target name="compile" depends="init">
+        <echo message="Compiling"/>
+		<javac srcdir="${src}" destdir="${classes}">
+            <classpath>
+                <pathelement location="${serv}\common\lib\servlet.jar"/>
+                <pathelement location="lib\commons-fileupload-1.2.1.jar"/>
+                <pathelement location="lib\commons-io-1.4.jar"/>
+                <pathelement location="${serv}\common\lib\ojdbc14.jar"/>
+            </classpath>
+        </javac>
+	</target>
+	
+	<target name="dist" depends="compile" description="Create war-file">
+        <echo message="Creating WAR"/>
+		<war destfile="${name}.war" webxml="${xml}\web.xml">
+            <classes dir="${classes}"/>
+            <fileset dir="${jsp}"/>
+            <lib dir="${lib}"/>
+            <zipfileset dir="img" prefix="img"/>
+            <zipfileset dir="files" prefix="files"/>
+        </war>
+	</target>
+
+    <target name="start">
+        <echo message="Tomcat starting"/>
+        <exec executable="${serv}\bin\startup.bat"/>
+    </target>   
+
+    <target name="stop">
+        <echo message="Tomcat stoping"/>
+        <exec executable="${serv}\bin\shutdown.bat"/>
+    </target>  
+
+    <target name="undeploy">
+        <echo message="Undeploing"/>
+        <delete dir="${serv}\webapps\${war}"/>
+        <delete file="${serv}\webapps\${war}.war"/>
+    </target> 
+
+    <target name="deploy">
+        <echo message="Deploying"/>
+        <antcall target="stop"/>
+        <antcall target="undeploy"/>
+        <antcall target="start"/>
+        <antcall target="dist"/>
+        <copy file="${name}.war" todir="${serv}\webapps"/>
+    </target>
+
+</project>
