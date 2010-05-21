@@ -22,6 +22,7 @@ import org.apache.commons.fileupload.servlet.ServletFileUpload;
 public class FilePictureStorage implements IPictureStorage {
 
     private Random random = new Random(); 
+    private String dir = "files/"; 
 
     /**
      * Stores a new picture.
@@ -30,42 +31,43 @@ public class FilePictureStorage implements IPictureStorage {
      * @param req a request containing picture.
      * @exception PictureStorageException.
      */
-    public void store(IGalleryPicture pic, HttpServletRequest req) 
+    public void store( IGalleryPicture pic, HttpServletRequest req ) 
             throws PictureStorageException {
                 
-		if (!ServletFileUpload.isMultipartContent(req)) {
-            throw new PictureStorageException("Server error:" + HttpServletResponse.SC_BAD_REQUEST);
+		if ( !ServletFileUpload.isMultipartContent( req ) ) {
+            throw new PictureStorageException( "Server error:" + 
+                HttpServletResponse.SC_BAD_REQUEST );
 		}
 		DiskFileItemFactory factory = new DiskFileItemFactory();
 		factory.setSizeThreshold(1024 * 1024);
-		File tempDir = new File("/temp/");
-		factory.setRepository(tempDir);
-		ServletFileUpload upload = new ServletFileUpload(factory);
-		upload.setSizeMax(1024 * 1024 * 10);
+		File tempDir = new File( dir );
+		factory.setRepository( tempDir );
+		ServletFileUpload upload = new ServletFileUpload( factory );
+		upload.setSizeMax( 1024 * 1024 * 10 );
 		try {
-			List items = upload.parseRequest(req);
+			List items = upload.parseRequest( req );
 			Iterator iter = items.iterator();
-			while (iter.hasNext()) {
-			    FileItem item = (FileItem) iter.next();
-			    if (!item.isFormField()) {		    	
-			        pic.setURL(processUploadedFile(item));
+			while ( iter.hasNext() ) {
+			    FileItem item = ( FileItem )iter.next();
+			    if ( !item.isFormField() ) {		    	
+			        pic.setURL( processUploadedFile( item ) );
 			    }
 			}			
-		} catch (Exception e) {
-			throw new PictureStorageException(e);
+		} catch ( Exception e ) {
+			throw new PictureStorageException( e );
 		}		    
     }
 
-	private String processUploadedFile(FileItem item) throws Exception {
+	private String processUploadedFile( FileItem item ) throws Exception {
     
 		File uploadetFile = null;
         String path = null;
 		do {
-			path = ("/upload/" + random.nextInt() + item.getName());					
-			uploadetFile = new File(path);		
-		} while(uploadetFile.exists());
+			path = ( dir + random.nextInt() + item.getName() );					
+			uploadetFile = new File( path );		
+		} while( uploadetFile.exists() );
 		uploadetFile.createNewFile();
-		item.write(uploadetFile);
+		item.write( uploadetFile );
         return path;
 	}
 
@@ -75,17 +77,17 @@ public class FilePictureStorage implements IPictureStorage {
      * @param pic a picture to remove.
      * @exception PictureStorageException.
      */
-    public void remove(IGalleryPicture pic) throws PictureStorageException {
+    public void remove( IGalleryPicture pic ) throws PictureStorageException {
         
-        File f = new File(pic.getURL());
-        if (!f.exists()) {
-            throw new PictureStorageException("No such file or directory: " + pic.getURL());
+        File f = new File( dir + pic.getURL() );
+        if ( !f.exists() ) {
+            throw new PictureStorageException( "No such file or directory: " + pic.getURL() );
         }
-        if (!f.canWrite()) {
-            throw new PictureStorageException("Write protected: " + pic.getURL());
+        if ( !f.canWrite() ) {
+            throw new PictureStorageException( "Write protected: " + pic.getURL() );
         }
-        if (!f.delete()) {
-            throw new PictureStorageException("Deletion failed.");
+        if ( !f.delete() ) {
+            throw new PictureStorageException( "Deletion failed." );
         }
     }
 }
