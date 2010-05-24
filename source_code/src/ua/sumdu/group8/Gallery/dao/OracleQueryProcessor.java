@@ -210,7 +210,7 @@ public class OracleQueryProcessor implements IQueryProcessor {
      */
     public void addCatalogue(IGalleryCatalogue cat)
             throws DataAccessException {
-        processUpdate(null, cat, GallerySQLConstants.ST_ADD_CAT, ACT_UPD_CAT);
+        processUpdate(null, cat, GallerySQLConstants.ST_ADD_CAT, ACT_ADD_CAT);
      }
 
     /**
@@ -221,7 +221,7 @@ public class OracleQueryProcessor implements IQueryProcessor {
      */
     public void addPicture(IGalleryPicture pic) 
             throws DataAccessException {
-        processUpdate(pic, null, GallerySQLConstants.ST_ADD_PIC, ACT_UPD_PIC);
+        processUpdate(pic, null, GallerySQLConstants.ST_ADD_PIC, ACT_ADD_PIC);
     }
 
     /**
