@@ -58,15 +58,10 @@
         function send() {
 			var pname = window.document.getElementById("parentname");
             var name = window.document.getElementById("name");
-            var path = window.document.getElementById("path");
             if( pname.value == "" || name.value == "") {
                 return false;
             } else {
-                if( path != null && path == "" ) {
-                    return false;
-                } else {
-                    window.document.forms['sendform'].submit();
-                }
+                window.document.forms['sendform'].submit();
             }
             return true;
 		}
@@ -86,12 +81,7 @@
     } else {
         boolean isCat = true;
         boolean isEdit = true;
-        if( session.getAttribute( "object" )  == null ) {
-            isEdit = false;
-        }
-        if( session.getAttribute( "target" ).equals( "pic" ) ) {
-            isCat = false;
-        }
+        boolean firstStep = false;
         String caption = null;
         String name = null;
         String label = null;
@@ -102,6 +92,23 @@
         int id = -1;
         IGalleryCatalogue cat = null;
         IGalleryPicture pic = null;
+        if( session.getAttribute( "target" ).equals( "pic" ) ) {
+            isCat = false;
+        }
+        if( session.getAttribute( "object" )  == null ) {
+            if( !isCat ) {
+                firstStep = true;
+            }
+            isEdit = false;
+        } else {
+            if( !isCat ) {
+                pic = ( IGalleryPicture )session.getAttribute( "object" );
+                if( pic.getID() == -1 ) {
+                    url = pic.getURL();
+                    isEdit=false;
+                }
+            }
+        }
         if( isCat ) {
             caption = "Cat";
             label = "Path";
@@ -118,7 +125,6 @@
             caption = "Pic";
             label = "Cat";
             if( isEdit ) {
-                pic = ( IGalleryPicture )session.getAttribute( "object" );
                 name = pic.getName();
                 desc = pic.getDescription();
                 id = pic.getID();
@@ -132,8 +138,14 @@
 
 <%= caption %>
 
-<form name="sendform" method="post" action="<%= session.getAttribute( "absolutePath" ) %>/">
-name: <input type="text" name="name" 
+<form <%= ( firstStep )?"enctype=\"multipart/form-data\"":"" %>
+name="sendform" method="post"  action="<%= session.getAttribute( "absolutePath" ) %>/">
+
+<% 
+        if( !firstStep ) { 
+%>
+
+name: <input id="name" type="text" name="name" 
 value="<%= isEdit?name:"" %>" /><br /><br />
 
 <%= label %><%= (isEdit?"Edit":"Add") %>
@@ -144,27 +156,49 @@ value="<%= (parentName != null)?parentName:"" %>" readonly />
     onclick="showPopWin('select.jsp', 400, 200, getParentID);" value="!" />
 <br /><br />
 
+<input type="hidden" name="mode" value="<%= isEdit?"edit":"add" %>" />
+<input type="hidden" name="target" value="<%= isCat?"cat":"pic" %>" />
+<input type="hidden" name="id" value="<%= id %>" />
+<input type="hidden" name="url" value="<%= ( !isCat )?url:"" %>" />
+<input type="hidden" id="parentid" name="parent" value="<%= parent %>" />
+
+Desc
+<textarea name="desc"><%= isEdit?desc:"" %></textarea><br /><br />
+
 <% 
-        if( !isCat ) { 
+        } else { 
 %>
 
 Path
-<input type="text" name="path" value="<%= ( url != null )?url:"" %>" /><br /><br />
+<input type="file" name="path" /><br /><br />
 
 <% 
         } 
 %>
 
-<input type="hidden" name="mode" value="<%= isEdit?"edit":"add" %>" />
-<input type="hidden" name="target" value="<%= isCat?"cat":"pic" %>" />
-<input type="hidden" name="id" value="<%= id %>" />
-<input type="hidden" id="parentid" name="parent" value="<%= parent %>" />
+<input value="Ok" 
+<%
+        if( !firstStep ) {
+%>
 
-Desc
-<textarea name="desc"><%= isEdit?desc:"" %></textarea><br /><br />
-<input type="button" value="Ok" onclick="send();" />
+type="button"
+onclick="send();" 
+
+<%
+        } else {
+%>
+
+type="submit"
+
+<%
+        }
+%>
+
+/>
+
 <input type="button" value="Cancel" 
 onclick="window.location.href='<%= session.getAttribute( "absolutePath" ) %>'" />
+
 </form>
 
 <%
