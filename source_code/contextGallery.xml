@@ -1,0 +1,40 @@
+<Context 
+    path="/Gallery" 
+    docBase="Gallery"        
+    reloadable="true" 
+    crossContext="true"
+>
+
+    <Resource 
+        name="jdbc/gallery_oracle" 
+        auth="Container"
+        type="javax.sql.DataSource" 
+    /> 
+
+    <ResourceParams name="jdbc/gallery_oracle">
+          <parameter>
+            <name>factory</name>
+            <value>org.apache.commons.dbcp.BasicDataSourceFactory</value>
+          </parameter>
+                  
+          <parameter>
+            <name>driverClassName</name>
+            <value>oracle.jdbc.driver.OracleDriver</value>
+          </parameter>
+          
+          <parameter>
+            <name>url</name>
+            <value>jdbc:oracle:thin:@127.0.0.1:1521:xe</value>
+          </parameter>
+          
+          <parameter>
+            <name>username</name>
+            <value>gallery</value>
+          </parameter>
+          
+          <parameter>
+            <name>password</name>
+            <value>gallery</value>
+          </parameter>
+    </ResourceParams>
+</Context>

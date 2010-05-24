@@ -3,6 +3,7 @@ package ua.sumdu.group8.Gallery.dao;
 import ua.sumdu.group8.Gallery.dao.exceptions.*;
 import ua.sumdu.group8.Gallery.*;
 import javax.servlet.http.*; 
+import javax.servlet.*; 
 
 /**
  * Provides common methods to access picture storage.
@@ -20,7 +21,7 @@ public interface IPictureStorage {
      * @param req a request containing picture.
      * @exception PictureStorageException.
      */
-    public void store(IGalleryPicture pic, HttpServletRequest req) 
+    public void store(IGalleryPicture pic, HttpServletRequest req, ServletContext sc) 
             throws PictureStorageException;
             
     /**

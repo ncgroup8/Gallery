@@ -29,7 +29,6 @@ public class EditPictureProcessor implements IActionProcessor {
             if( ( idLine ).matches( "[\\d]{1,10}" ) ) {
                  id = Integer.parseInt( idLine );
             }
-            
             if( request.getParameter( "act" ).equals( "editpic" ) ) {
                 if( id != -1 ) {
                     IGalleryPicture pic = iqp.getPictureByID( id );
@@ -41,13 +40,6 @@ public class EditPictureProcessor implements IActionProcessor {
             }
             if( request.getParameter( "act" ).equals( "delpic" ) ) {
                 if( id != -1 ) {
-                    IGalleryPicture pic = iqp.getPictureByID( id );
-                    /*IPictureStorage ips = PictureStorage.getInstance();
-                    try {
-                        ips.remove( pic );
-                    } catch ( PictureStorageException ex ) {
-                        throw new DataAccessException( "Cant del specified picture." + ex );
-                    }*/
                     iqp.delPictureByID( id );
                     request.getSession().setAttribute( "error", "Picture deleted." );
                 } else {
@@ -59,6 +51,7 @@ public class EditPictureProcessor implements IActionProcessor {
             int cat = -1;
             String name = null;
             String description = null;
+            String url = null;
             try {
                 id = Integer.parseInt( request.getParameter( "id" ) );
                 cat = Integer.parseInt( request.getParameter( "parent" ) );
@@ -67,9 +60,27 @@ public class EditPictureProcessor implements IActionProcessor {
             }
             name = request.getParameter( "name" );
             description = request.getParameter( "desc" );
-            String url = iqp.getPictureByID( id ).getURL();
-            IGalleryPicture pic = new GalleryPicture( id, cat, url, name, description );
-            iqp.updatePicture( pic );
+            url = request.getParameter( "url" );
+            if( cat != -1 ) {
+                IGalleryPicture pic = new GalleryPicture();
+                pic.setID( id );
+                if( name != null ) {
+                    pic.setName( name );
+                }
+                pic.setCatalogue( cat );
+                if( description != null ) {
+                    pic.setDescription( description );
+                }
+                if( url != null ) {
+                    pic.setURL( url );
+                } 
+                if( request.getParameter( "mode" ).equals( "edit" ) ) {
+                    iqp.updatePicture( pic );
+                }
+                if( request.getParameter( "mode" ).equals( "add" ) ) {
+                    iqp.addPicture( pic );
+                }
+            }
         }
     }
 }

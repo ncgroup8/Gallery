@@ -7,9 +7,10 @@ import javax.servlet.http.*;
 import java.io.*;  
 import java.util.*;
 
-import org.apache.commons.fileupload.FileItem; 
-import org.apache.commons.fileupload.disk.DiskFileItemFactory;  
-import org.apache.commons.fileupload.servlet.ServletFileUpload;  
+import org.apache.commons.fileupload.*; 
+import org.apache.commons.fileupload.disk.*;  
+import org.apache.commons.fileupload.util.*;
+import org.apache.commons.fileupload.servlet.*;  
 
 
 /**
@@ -22,7 +23,6 @@ import org.apache.commons.fileupload.servlet.ServletFileUpload;
 public class FilePictureStorage implements IPictureStorage {
 
     private Random random = new Random(); 
-    private String dir = "files/"; 
 
     /**
      * Stores a new picture.
@@ -31,7 +31,7 @@ public class FilePictureStorage implements IPictureStorage {
      * @param req a request containing picture.
      * @exception PictureStorageException.
      */
-    public void store( IGalleryPicture pic, HttpServletRequest req ) 
+    public void store( IGalleryPicture pic, HttpServletRequest req, ServletContext sc ) 
             throws PictureStorageException {
                 
 		if ( !ServletFileUpload.isMultipartContent( req ) ) {
@@ -40,7 +40,7 @@ public class FilePictureStorage implements IPictureStorage {
 		}
 		DiskFileItemFactory factory = new DiskFileItemFactory();
 		factory.setSizeThreshold(1024 * 1024);
-		File tempDir = new File( dir );
+		File tempDir = ( File )sc.getAttribute( "javax.servlet.context.tempdir" ); 
 		factory.setRepository( tempDir );
 		ServletFileUpload upload = new ServletFileUpload( factory );
 		upload.setSizeMax( 1024 * 1024 * 10 );
@@ -50,7 +50,7 @@ public class FilePictureStorage implements IPictureStorage {
 			while ( iter.hasNext() ) {
 			    FileItem item = ( FileItem )iter.next();
 			    if ( !item.isFormField() ) {		    	
-			        pic.setURL( processUploadedFile( item ) );
+			        pic.setURL( processUploadedFile( item, sc ) );
 			    }
 			}			
 		} catch ( Exception e ) {
@@ -58,12 +58,13 @@ public class FilePictureStorage implements IPictureStorage {
 		}		    
     }
 
-	private String processUploadedFile( FileItem item ) throws Exception {
+	private String processUploadedFile( FileItem item, ServletContext sc ) throws Exception {
     
 		File uploadetFile = null;
         String path = null;
+        String fileName = item.getName().substring( item.getName().lastIndexOf( '\\' ) + 1 );
 		do {
-			path = ( dir + random.nextInt() + item.getName() );					
+			path = sc.getRealPath( "/files/" + random.nextInt() + fileName );
 			uploadetFile = new File( path );		
 		} while( uploadetFile.exists() );
 		uploadetFile.createNewFile();
@@ -79,7 +80,7 @@ public class FilePictureStorage implements IPictureStorage {
      */
     public void remove( IGalleryPicture pic ) throws PictureStorageException {
         
-        File f = new File( dir + pic.getURL() );
+        File f = new File( pic.getURL() );
         if ( !f.exists() ) {
             throw new PictureStorageException( "No such file or directory: " + pic.getURL() );
         }

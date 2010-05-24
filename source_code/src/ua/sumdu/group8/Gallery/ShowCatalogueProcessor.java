@@ -69,4 +69,39 @@ public class ShowCatalogueProcessor implements IActionProcessor {
         path.add( iqp.getCatalogueByID( iqp.getRoot().getID() ) );
         return path;
     }
+    
+    /**
+     * Returns list of all categories in database
+     *
+     * @throws DataAccessException
+     */
+    public static List getAllCatalogues() throws DataAccessException {
+        IQueryProcessor iqp = QueryProcessor.getInstance();
+        List cats = getSubCatalogues( iqp.getRoot().getID() );
+        cats.add( iqp.getRoot() );
+        return cats;
+    }
+    
+    /**
+     * Returns list subcatalogues
+     *
+     * @param id - parent id for catalogues to search
+     * @throws DataAccessException
+     */
+    private static List getSubCatalogues( int id ) throws DataAccessException {
+        IQueryProcessor iqp = QueryProcessor.getInstance();
+        List result = new LinkedList();
+        List cats = iqp.getCataloguesByParent( id, GallerySQLConstants.SORT_ASC );
+        if( cats != null ) {
+            result.addAll( cats );
+            Iterator it = cats.iterator();
+            while( it.hasNext() ) {
+                List sub = getSubCatalogues( ( ( IGalleryCatalogue )it.next() ).getID() );
+                if( sub != null ) {
+                    result.addAll( sub );
+                }
+            }
+        }
+        return result;
+    }
 }

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="windows-1251"?>
-<project name="servlet" basedir="." default="dist">
+<project name="Gallery" basedir="." default="dist">
     <property name="name" location="Gallery"/>
     <property name="war" value="Gallery"/>
 	<property name="src" location="src"/>
@@ -25,9 +25,9 @@
 		<javac srcdir="${src}" destdir="${classes}">
             <classpath>
                 <pathelement location="${serv}\common\lib\servlet.jar"/>
+                <pathelement location="${serv}\common\lib\ojdbc14.jar"/>
                 <pathelement location="lib\commons-fileupload-1.2.1.jar"/>
                 <pathelement location="lib\commons-io-1.4.jar"/>
-                <pathelement location="${serv}\common\lib\ojdbc14.jar"/>
             </classpath>
         </javac>
 	</target>
@@ -39,6 +39,8 @@
             <fileset dir="${jsp}"/>
             <lib dir="${lib}"/>
             <zipfileset dir="img" prefix="img"/>
+            <zipfileset dir="css" prefix="css"/>
+            <zipfileset dir="scripts" prefix="scripts"/>
             <zipfileset dir="files" prefix="files"/>
         </war>
 	</target>

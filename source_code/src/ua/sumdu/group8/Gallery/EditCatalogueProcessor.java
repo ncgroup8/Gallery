@@ -41,8 +41,8 @@ public class EditCatalogueProcessor implements IActionProcessor {
             }
             if( request.getParameter( "act" ).equals( "delcat" ) ) {
                 if( id != -1 ) {
-                    //delSubCataloguesWithContent( id );
                     iqp.delCatalogueByID( id );
+                    request.getSession().setAttribute( "error", "Catalogue deleted." );
                 }
             }
         } else {
@@ -58,35 +58,16 @@ public class EditCatalogueProcessor implements IActionProcessor {
             }
             name = request.getParameter( "name" );
             description = request.getParameter( "desc" );
-            IGalleryCatalogue cat = new GalleryCatalogue( id, parent, name, description );
-            iqp.updateCatalogue( cat );
-        }
-    }
-    
-    /*private static void delSubCataloguesWithContent( int id ) 
-        throws DataAccessException {
-        
-        IQueryProcessor iqp = QueryProcessor.getInstance();
-        IPictureStorage ips = PictureStorage.getInstance();
-        List subCats = iqp.getCataloguesByParent( id, GallerySQLConstants.SORT_ASC );
-        List subPics = iqp.getPicturesFromCat( id, GallerySQLConstants.SORT_ASC );
-        Iterator it = null;
-        if( subPics != null ) {
-            it = subPics.iterator();
-            while( it.hasNext() ) {
-                try {
-                    ips.remove( ( IGalleryPicture )it.next() );
-                } catch ( PictureStorageException ex ) {
-                    throw new DataAccessException( "Cant del specified picture.", ex );
+            if( parent != -1 ) {
+                if( request.getParameter( "mode" ).equals( "edit" ) ) {
+                    IGalleryCatalogue cat = new GalleryCatalogue( id, parent, name, description );
+                    iqp.updateCatalogue( cat );
+                }
+                if( request.getParameter( "mode" ).equals( "add" ) ) {
+                    IGalleryCatalogue cat = new GalleryCatalogue( 0, parent, name, description );
+                    iqp.addCatalogue( cat );
                 }
             }
         }
-        if( subCats != null ) {
-            it = subCats.iterator();
-            while( it.hasNext() ) {
-                delSubCataloguesWithContent( ( ( IGalleryCatalogue )it.next() ).getID() );
-                iqp.delCatalogueByID( id );
-            }
-        }
-    }*/
+    }
 }
