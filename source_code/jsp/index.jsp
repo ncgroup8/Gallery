@@ -1,4 +1,5 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
+<%@ page errorPage="/errorpage.jsp" %>
 
 <%
     if( session.getAttribute( "target" ) == null ) {
@@ -39,9 +40,9 @@
 
 <b>menu</b><br /><br />
 
-<a href="">AddCat</a><br />
+<a href="<%= session.getAttribute( "absolutePath" ) + "/?act=addcat" %>">AddCat</a><br />
 
-<a href="">AddPic</a><br />
+<a href="<%= session.getAttribute( "absolutePath" ) + "/?act=addpic" %>">AddPic</a><br />
 
 </td>
 <td>

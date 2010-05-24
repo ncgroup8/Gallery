@@ -162,7 +162,7 @@ Directory is empty!
 
 <tr>
 <td rowspan="<%= SHOWPIC_ROWS %>">
-<img src="files/<%= pic.getURL() %>" />
+<img src="<%= pic.getURL() %>" />
 </td>
 <td><b>Name:</b> 
 <%= pic.getName() %>
