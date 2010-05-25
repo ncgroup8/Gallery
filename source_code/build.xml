@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="windows-1251"?>
 <project name="Gallery" basedir="." default="dist">
+    <property environment="env"/>
     <property name="name" location="Gallery"/>
     <property name="war" value="Gallery"/>
 	<property name="src" location="src"/>
@@ -7,7 +8,7 @@
     <property name="xml" location="xml"/>
     <property name="lib" location="lib"/>
     <property name="jsp" location="jsp"/>
-    <property name="serv" location="D:\Develop\Java\TomCat4"/>
+    <property name="serv" location="${env.CATALINA_HOME}"/>
     
 	<target name="clean">
         <echo message="Cleaning"/>
