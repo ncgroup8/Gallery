@@ -1,40 +1,60 @@
 <Context 
     path="/Gallery" 
-    docBase="Gallery"        
+    docBase="Gallery" 
     reloadable="true" 
-    crossContext="true"
+    crossContext="true" 
+    override="true"  
+    cachingAllowed="true" 
+    useNaming="true"
 >
 
     <Resource 
         name="jdbc/gallery_oracle" 
-        auth="Container"
         type="javax.sql.DataSource" 
+        auth="Container"
     /> 
 
     <ResourceParams name="jdbc/gallery_oracle">
-          <parameter>
-            <name>factory</name>
-            <value>org.apache.commons.dbcp.BasicDataSourceFactory</value>
-          </parameter>
-                  
-          <parameter>
-            <name>driverClassName</name>
-            <value>oracle.jdbc.driver.OracleDriver</value>
-          </parameter>
-          
-          <parameter>
-            <name>url</name>
-            <value>jdbc:oracle:thin:@127.0.0.1:1521:xe</value>
-          </parameter>
-          
-          <parameter>
-            <name>username</name>
-            <value>gallery</value>
-          </parameter>
-          
-          <parameter>
-            <name>password</name>
-            <value>gallery</value>
-          </parameter>
+      <parameter>
+        <name>factory</name>
+        <value>org.apache.commons.dbcp.BasicDataSourceFactory</value>
+      </parameter>
+      
+      <parameter>
+        <name>driverClassName</name>
+        <value>oracle.jdbc.OracleDriver</value>
+      </parameter>
+
+      <parameter>
+        <name>url</name>
+        <value>jdbc:oracle:thin:@127.0.0.1:1521:xe</value>
+      </parameter>
+      
+      <parameter>
+        <name>username</name>
+        <value>gallery</value>
+      </parameter>
+      
+      <parameter>
+        <name>password</name>
+        <value>gallery</value>
+      </parameter>
+      
+       <parameter>
+          <name>maxActive</name>
+          <value>10</value>
+       </parameter>
+       
+       <parameter>
+          <name>maxIdle</name>
+          <value>4</value>
+       </parameter>
+       
+       <parameter>
+          <name>validationQuery</name>
+          <value>SELECT SYSDATE FROM DUAL</value>
+       </parameter>
+       
     </ResourceParams>
+
 </Context>

@@ -17,6 +17,8 @@ import javax.sql.*;
  */
 public class OracleQueryProcessor implements IQueryProcessor {
 
+    private final static String DATASOURCE = "java:comp/env/jdbc/gallery_oracle";
+    
     private final static int ACT_GET_PIC_BY_ID = 1;
     private final static int ACT_GET_PIC_BY_NAME = 2;
     private final static int ACT_GET_PIC_BY_CAT = 3;
@@ -39,7 +41,7 @@ public class OracleQueryProcessor implements IQueryProcessor {
             if (ctx == null) {
                 throw new DataAccessException("Cannot get InitialContext.");
             }
-            DataSource ds = (DataSource) ctx.lookup(GalleryConstants.DATASOURCE);
+            DataSource ds = (DataSource) ctx.lookup(DATASOURCE);
             if (ds != null) {
                 result = ds.getConnection();
             } else {
@@ -133,8 +135,9 @@ public class OracleQueryProcessor implements IQueryProcessor {
             throw new DataAccessException("Database usage error.", ex);
         } finally {
             try {
-                rs.close();
-                con.close();
+                if(rs != null) rs.close();
+                if(pst != null) pst.close();
+                if(con != null) con.close();
             } catch (SQLException ex) {
                 throw new DataAccessException("Connection closing error.", ex);
             }
@@ -185,7 +188,8 @@ public class OracleQueryProcessor implements IQueryProcessor {
             throw new DataAccessException("Database usage error.", ex);
         } finally {
             try {
-                con.close();
+                if(pst != null) pst.close();
+                if(con != null) con.close();
             } catch (SQLException ex) {
                 throw new DataAccessException("Connection closing error.", ex);
             }
@@ -252,8 +256,9 @@ public class OracleQueryProcessor implements IQueryProcessor {
             }
         }
         Connection con = this.getConnection();
+        PreparedStatement pst = null;
         try {
-            PreparedStatement pst = con.prepareStatement(
+            pst = con.prepareStatement(
                 GallerySQLConstants.ST_DEL_CAT);
             pst.setInt(1, id);
             res = pst.executeUpdate();
@@ -261,7 +266,8 @@ public class OracleQueryProcessor implements IQueryProcessor {
             throw new DataAccessException("Database usage error.", ex);
         } finally {
             try {
-                con.close();
+                if(pst != null) pst.close();
+                if(con != null) con.close();
             } catch (SQLException ex) {
                 throw new DataAccessException("Connection closing error.", ex);
             }
@@ -284,8 +290,9 @@ public class OracleQueryProcessor implements IQueryProcessor {
             return 0;
         }
         Connection con = this.getConnection();
+        PreparedStatement pst = null;
         try {
-            PreparedStatement pst = con.prepareStatement(
+            pst = con.prepareStatement(
                 GallerySQLConstants.ST_DEL_PIC);
             pst.setInt(1, pic.getID());
             res = pst.executeUpdate();
@@ -296,7 +303,8 @@ public class OracleQueryProcessor implements IQueryProcessor {
             throw new DataAccessException("Picture removing error.", ex);
         } finally {
             try {
-                con.close();
+                if(pst != null) pst.close();
+                if(con != null) con.close();
             } catch (SQLException ex) {
                 throw new DataAccessException("Connection closing error.", ex);
             }
