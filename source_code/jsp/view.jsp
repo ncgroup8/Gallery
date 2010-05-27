@@ -1,3 +1,4 @@
+<%@ page import="java.io.*" %>
 <%@ page import="java.util.*" %>
 <%@ page import="ua.sumdu.group8.Gallery.*" %>
 
@@ -162,7 +163,8 @@ Directory is empty!
 
 <tr>
 <td rowspan="<%= SHOWPIC_ROWS %>">
-<img src="<%= pic.getURL() %>" />
+<img src="<%= session.getAttribute( "absolutePath" ) + "/files/" +
+    ( new File( pic.getURL() ).getName() ) %>" />
 </td>
 <td><b>Name:</b> 
 <%= pic.getName() %>

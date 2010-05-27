@@ -1,11 +1,11 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
-<%@ page errorPage="/errorpage.jsp" %>
 
 <%
     if( session.getAttribute( "target" ) == null ) {
 %>
 
-<jsp:forward page='<%= ( session.getAttribute( "absolutePath" ) + "/" ) %>' />
+<jsp:forward page='<%= ( session.getAttribute( "absolutePath" ) + "/?" + 
+    request.getQueryString() ) %>' />
 
 <%
     }
@@ -60,6 +60,7 @@
 </table>
 
 <%
+        session.setAttribute( "target", null );
     }
 %>
 

@@ -1,5 +1,4 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
-<%@ page errorPage="/errorpage.jsp" %>
 <%@ page import="java.util.*" %>
 <%@ page import="ua.sumdu.group8.Gallery.*" %>
 
@@ -23,9 +22,14 @@
     if( session.getAttribute( "target" ) == null ) {
 %>
 
-<jsp:forward page='<%= ( session.getAttribute( "absolutePath" ) + "/" ) %>' />
+<jsp:forward page='<%= ( session.getAttribute( "absolutePath" ) + "/?" + 
+    request.getQueryString() ) %>' />
 
 <%
+    }
+    boolean isCat = true;
+    if( session.getAttribute( "target" ).equals( "pic" ) ) {
+        isCat = false;
     }
 %>
 
@@ -53,12 +57,19 @@
 			window.document.getElementById("parentid").value = data[0];
             window.document.getElementById("parentname").value = str.trim();
 		}
+        function uploadpic(uploadedurl) {
+			window.document.getElementById("url").value = uploadedurl;
+            if( window.document.getElementById("url").value != "" ) {
+                window.document.getElementById("selectpic").disabled = true;
+            }
+		}
 	</script>
     <script type="text/javascript">
         function send() {
 			var pname = window.document.getElementById("parentname");
             var name = window.document.getElementById("name");
-            if( pname.value == "" || name.value == "") {
+            <%= ( !isCat?"var url = window.document.getElementById(\"url\");":"") %>
+            if( pname.value == "" || name.value == "" <%= (!isCat)?"|| url.value == \"\" ":"" %>) {
                 return false;
             } else {
                 window.document.forms['sendform'].submit();
@@ -79,35 +90,19 @@
 
 <%
     } else {
-        boolean isCat = true;
         boolean isEdit = true;
-        boolean firstStep = false;
         String caption = null;
         String name = null;
         String label = null;
         String desc = null;
         String parentName = null;
-        String url = null;
+        String url = "";
         int parent = 0;
         int id = -1;
         IGalleryCatalogue cat = null;
         IGalleryPicture pic = null;
-        if( session.getAttribute( "target" ).equals( "pic" ) ) {
-            isCat = false;
-        }
         if( session.getAttribute( "object" )  == null ) {
-            if( !isCat ) {
-                firstStep = true;
-            }
             isEdit = false;
-        } else {
-            if( !isCat ) {
-                pic = ( IGalleryPicture )session.getAttribute( "object" );
-                if( pic.getID() == -1 ) {
-                    url = pic.getURL();
-                    isEdit=false;
-                }
-            }
         }
         if( isCat ) {
             caption = "Cat";
@@ -125,6 +120,7 @@
             caption = "Pic";
             label = "Cat";
             if( isEdit ) {
+                pic = ( IGalleryPicture )session.getAttribute( "object" );
                 name = pic.getName();
                 desc = pic.getDescription();
                 id = pic.getID();
@@ -138,12 +134,7 @@
 
 <%= caption %>
 
-<form <%= ( firstStep )?"enctype=\"multipart/form-data\"":"" %>
-name="sendform" method="post"  action="<%= session.getAttribute( "absolutePath" ) %>/">
-
-<% 
-        if( !firstStep ) { 
-%>
+<form name="sendform" method="post"  action="<%= session.getAttribute( "absolutePath" ) %>/">
 
 name: <input id="name" type="text" name="name" 
 value="<%= isEdit?name:"" %>" /><br /><br />
@@ -152,9 +143,20 @@ value="<%= isEdit?name:"" %>" /><br /><br />
 
 <input type="text" id="parentname" 
 value="<%= (parentName != null)?parentName:"" %>" readonly />
-<input type="button" 
-    onclick="showPopWin('select.jsp', 400, 200, getParentID);" value="!" />
+<input type="button" onclick="showPopWin('select.jsp', 400, 200, getParentID);" value="!" />
 <br /><br />
+
+<%
+        if( !isCat && !isEdit ) {
+%>
+
+<input type="button" id="selectpic"
+onclick="showPopWin('upload.jsp', 400, 200, uploadpic);" value="Choose pic" />
+<br /><br />
+
+<%
+        }    
+%>
 
 <input type="hidden" name="mode" value="<%= isEdit?"edit":"add" %>" />
 <input type="hidden" name="target" value="<%= isCat?"cat":"pic" %>" />
@@ -165,36 +167,7 @@ value="<%= (parentName != null)?parentName:"" %>" readonly />
 Desc
 <textarea name="desc"><%= isEdit?desc:"" %></textarea><br /><br />
 
-<% 
-        } else { 
-%>
-
-Path
-<input type="file" name="path" /><br /><br />
-
-<% 
-        } 
-%>
-
-<input value="Ok" 
-<%
-        if( !firstStep ) {
-%>
-
-type="button"
-onclick="send();" 
-
-<%
-        } else {
-%>
-
-type="submit"
-
-<%
-        }
-%>
-
-/>
+<input value="Ok" type="button" onclick="send();" />
 
 <input type="button" value="Cancel" 
 onclick="window.location.href='<%= session.getAttribute( "absolutePath" ) %>'" />
@@ -202,6 +175,7 @@ onclick="window.location.href='<%= session.getAttribute( "absolutePath" ) %>'" /
 </form>
 
 <%
+        session.setAttribute( "target", null );
     }
 %>
 
