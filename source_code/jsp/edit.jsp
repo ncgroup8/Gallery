@@ -27,6 +27,11 @@
 
 <%
     }
+    int catId = 1;
+    String idLine = request.getParameter( "id" );
+    if( ( idLine != null) && ( idLine ).matches( "[\\d]{1,10}" ) ) {
+        catId = Integer.parseInt( idLine );
+    }
     boolean isCat = true;
     if( session.getAttribute( "target" ).equals( "pic" ) ) {
         isCat = false;
@@ -139,11 +144,12 @@
 name: <input id="name" type="text" name="name" 
 value="<%= isEdit?name:"" %>" /><br /><br />
 
-<%= label %><%= (isEdit?"Edit":"Add") %>
+<%= label %><%= ( isEdit?"Edit":"Add" ) %>
 
 <input type="text" id="parentname" 
 value="<%= (parentName != null)?parentName:"" %>" readonly />
-<input type="button" onclick="showPopWin('select.jsp', 400, 200, getParentID);" value="!" />
+<input type="button" 
+onclick="showPopWin('<%= session.getAttribute( "absolutePath" ) %>/?act=showcat&id=<%= catId %>&cut=y', 300, 600, getParentID);"value="!" />
 <br /><br />
 
 <%
