@@ -42,13 +42,15 @@ public class ActionDipatcher extends HttpServlet {
                     request.getSession().setAttribute( "cats", 
                         ShowCatalogueProcessor.getAllCatalogues() );
                     request.getSession().setAttribute( "object", null );
-                    response.sendRedirect( request.getContextPath() + "/edit.jsp" );
+                    response.sendRedirect( request.getContextPath() + "/edit.jsp?" 
+                        + request.getQueryString() );
                 } else if( request.getParameter( "act" ).equals( "addcat" ) ) {
                     request.getSession().setAttribute( "target", "cat" );
                     request.getSession().setAttribute( "cats", 
                         ShowCatalogueProcessor.getAllCatalogues() );
                     request.getSession().setAttribute( "object", null );
-                    response.sendRedirect( request.getContextPath() + "/edit.jsp" );
+                    response.sendRedirect( request.getContextPath() + "/edit.jsp?" 
+                        + request.getQueryString() );
                 } else {
                     if( request.getParameter( "id" ) == null ) {
                         request.getSession().setAttribute( "error", "Wrong or empty ID." );
@@ -64,8 +66,14 @@ public class ActionDipatcher extends HttpServlet {
                         if( request.getParameter( "act" ).equals( "showcat" ) ) {
                             IActionProcessor sc = new ShowCatalogueProcessor();
                             sc.process( request );
-                            response.sendRedirect( request.getContextPath() + "/index.jsp?" 
-                                + request.getQueryString() );
+                            String cutParam = request.getParameter( "cut" );
+                            if( cutParam != null && cutParam.equals( "y" ) ) {
+                                request.getSession().setAttribute( "cut", "y" );
+                                response.sendRedirect( request.getContextPath() + "/view.jsp" );
+                            } else {
+                                response.sendRedirect( request.getContextPath() + "/index.jsp?" 
+                                    + request.getQueryString() );
+                            }
                         }
                         
                         if( request.getParameter( "act" ).equals( "editpic" ) ) {
