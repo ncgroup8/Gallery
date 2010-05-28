@@ -23,12 +23,14 @@ import org.apache.commons.fileupload.servlet.*;
 public class FilePictureStorage implements IPictureStorage {
 
     private Random random = new Random(); 
+    public final static String FILES_CAT = "/files/";
 
     /**
      * Stores a new picture.
      * 
      * @param pic a picture to store.
      * @param req a request containing picture.
+     * @param sc servlet context.
      * @exception PictureStorageException.
      */
     public void store( IGalleryPicture pic, HttpServletRequest req, ServletContext sc ) 
@@ -58,13 +60,20 @@ public class FilePictureStorage implements IPictureStorage {
 		}		    
     }
 
+    /**
+     * Stores uploaded picture to hdd.
+     * 
+     * @param item a picture to store.
+     * @param sc servlet context.
+     * @exception Exception.
+     */
 	private String processUploadedFile( FileItem item, ServletContext sc ) throws Exception {
     
 		File uploadetFile = null;
         String path = null;
-        String fileName = item.getName().substring( item.getName().lastIndexOf( '\\' ) + 1 );
+        String fileName = new File( item.getName() ).getName();
 		do {
-			path = sc.getRealPath( "/files/" + random.nextInt() + fileName );
+			path = sc.getRealPath( FILES_CAT + random.nextInt() + fileName );
 			uploadetFile = new File( path );		
 		} while( uploadetFile.exists() );
 		uploadetFile.createNewFile();

@@ -57,13 +57,15 @@ public class ActionDipatcher extends HttpServlet {
                         if( request.getParameter( "act" ).equals( "showpic" ) ) {
                             IActionProcessor sp = new ShowPictureProcessor();
                             sp.process( request );
-                            response.sendRedirect( request.getContextPath() + "/index.jsp" );
+                            response.sendRedirect( request.getContextPath() + "/index.jsp?" 
+                                + request.getQueryString() );
                         }
                         
                         if( request.getParameter( "act" ).equals( "showcat" ) ) {
                             IActionProcessor sc = new ShowCatalogueProcessor();
                             sc.process( request );
-                            response.sendRedirect( request.getContextPath() + "/index.jsp" );
+                            response.sendRedirect( request.getContextPath() + "/index.jsp?" 
+                                + request.getQueryString() );
                         }
                         
                         if( request.getParameter( "act" ).equals( "editpic" ) ) {
@@ -71,7 +73,8 @@ public class ActionDipatcher extends HttpServlet {
                             sc.process( request );
                             request.getSession().setAttribute( "cats", 
                                 ShowCatalogueProcessor.getAllCatalogues() );
-                            response.sendRedirect( request.getContextPath() + "/edit.jsp" );
+                            response.sendRedirect( request.getContextPath() + "/edit.jsp?"
+                                + request.getQueryString() );
                         }
                         
                         if( request.getParameter( "act" ).equals( "editcat" ) ) {
@@ -79,7 +82,8 @@ public class ActionDipatcher extends HttpServlet {
                             sc.process( request );
                             request.getSession().setAttribute( "cats", 
                                 ShowCatalogueProcessor.getAllCatalogues() );
-                            response.sendRedirect( request.getContextPath() + "/edit.jsp" );
+                            response.sendRedirect( request.getContextPath() + "/edit.jsp?"
+                                + request.getQueryString() );
                         }
                         
                         if( request.getParameter( "act" ).equals( "delpic" ) ) {
@@ -115,11 +119,11 @@ public class ActionDipatcher extends HttpServlet {
 
         if( request.getParameter( "mode" ) != null ) {
             try {
-                if( request.getSession().getAttribute( "target" ).equals( "cat" ) ) {
+                if( request.getParameter( "target" ).equals( "cat" ) ) {
                     IActionProcessor sc = new EditCatalogueProcessor();
                     sc.process( request );
                 }
-                if( request.getSession().getAttribute( "target" ).equals( "pic" ) ) {
+                if( request.getParameter( "target" ).equals( "pic" ) ) {
                     IActionProcessor sc = new EditPictureProcessor();
                     sc.process( request );
                 }
@@ -136,15 +140,12 @@ public class ActionDipatcher extends HttpServlet {
                 
                 IQueryProcessor iqp = QueryProcessor.getInstance();
                 pic.setID( -1 );
-                //pic.setName( "temp name" );
-                //pic.setDescription( "temp desc" );
                 pic.setCatalogue( iqp.getRoot().getID() );
-                //iqp.addPicture( pic );
-                request.getSession().setAttribute( "object", pic );
+                request.getSession().setAttribute( "uploadedpic", pic );
                 request.getSession().setAttribute( "target", "pic" );
-                request.getSession().setAttribute( "cats", 
-                    ShowCatalogueProcessor.getAllCatalogues() );
-                response.sendRedirect( request.getContextPath() + "/edit.jsp" );
+                /*request.getSession().setAttribute( "cats", 
+                    ShowCatalogueProcessor.getAllCatalogues() );*/
+                response.sendRedirect( request.getContextPath() + "/upload.jsp" );
             } catch ( PictureStorageException ex ) {
                 request.getSession().setAttribute( "error", "Data storing error: " + ex.toString() );
                 response.sendRedirect( request.getContextPath() + "/index.jsp" );

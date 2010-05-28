@@ -19,6 +19,7 @@ public interface IPictureStorage {
      * 
      * @param pic a picture to store.
      * @param req a request containing picture.
+     * @param sc servlet context.
      * @exception PictureStorageException.
      */
     public void store(IGalleryPicture pic, HttpServletRequest req, ServletContext sc) 
