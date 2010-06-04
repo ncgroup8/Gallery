@@ -3,6 +3,7 @@
 
 <html>
 <head>
+    <link rel="stylesheet" type="text/css" href="css/style.css" />
     <script type="text/javascript">
 		function hide() {
             var url = window.document.getElementById("url");
@@ -15,14 +16,16 @@
 		}
 	</script>
 </head>
-<body>
 
 <%
     if( session.getAttribute( "uploadedpic" ) == null ) {
 %>
 
+<body>
 <form enctype="multipart/form-data" method="post"
 action="<%= session.getAttribute( "absolutePath" ) %>/" >
+
+Select picture:<br />
 
 <input type="file" name="path" /><br /><br />
 
@@ -37,13 +40,9 @@ onclick="hide();" />
     } else {
 %>
 
-<input type="hidden" name="url" 
+<body onload="hide();">
+<input type="hidden" id="url" 
 value="<%= ( ( IGalleryPicture )session.getAttribute( "uploadedpic" ) ).getURL() %>" />
-
-Pic Successfully uploaded!
-
-<input value="Ok" type="button" onclick="hide();" />
-
 <%
         session.setAttribute( "uploadedpic", null );
     }    
