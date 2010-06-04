@@ -19,6 +19,10 @@
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>default</servlet-name>
+        <url-pattern>*.bmp</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>default</servlet-name>
         <url-pattern>*.gif</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
@@ -42,9 +46,14 @@
         <url-pattern>*.html</url-pattern>
     </servlet-mapping>
 
-    <error-page>
-        <exception-type>ServletException</exception-type>
-        <location>/jsp/errorpage.jsp</location>
+    <error-page> 
+        <error-code>500</error-code>
+        <location>/errorpage.jsp</location>          
+    </error-page>
+
+    <error-page> 
+        <error-code>404</error-code>
+        <location>/errorpage.jsp</location>          
     </error-page>
 
     <resource-ref>

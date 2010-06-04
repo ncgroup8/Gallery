@@ -37,6 +37,9 @@ public class ShowCatalogueProcessor implements IActionProcessor {
                 }
             }
             if( id != -1 ) {
+                if( iqp.getCatalogueByID( id ) == null ) {
+                    throw new DataAccessException( "Directory you request not exist." );
+                }
                 List cats = iqp.getCataloguesByParent( id, sort );
                 List pics = iqp.getPicturesFromCat( id, sort );
                 request.getSession().setAttribute( "cats", cats );

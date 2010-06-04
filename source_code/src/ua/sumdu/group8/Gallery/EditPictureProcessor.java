@@ -40,8 +40,10 @@ public class EditPictureProcessor implements IActionProcessor {
             }
             if( request.getParameter( "act" ).equals( "delpic" ) ) {
                 if( id != -1 ) {
+                    int catalogue = iqp.getPictureByID( id ).getCatalogue();
                     iqp.delPictureByID( id );
-                    request.getSession().setAttribute( "error", "Picture deleted." );
+                    request.getSession().setAttribute( "returnID", 
+                        new Integer( catalogue ) );
                 } else {
                     throw new DataAccessException( "Cant del specified picture." );
                 }

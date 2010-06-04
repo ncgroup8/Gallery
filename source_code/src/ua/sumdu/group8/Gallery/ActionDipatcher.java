@@ -42,14 +42,14 @@ public class ActionDipatcher extends HttpServlet {
                     request.getSession().setAttribute( "cats", 
                         ShowCatalogueProcessor.getAllCatalogues() );
                     request.getSession().setAttribute( "object", null );
-                    response.sendRedirect( request.getContextPath() + "/edit.jsp?" 
+                    response.sendRedirect( request.getContextPath() + "/index.jsp?" 
                         + request.getQueryString() );
                 } else if( request.getParameter( "act" ).equals( "addcat" ) ) {
                     request.getSession().setAttribute( "target", "cat" );
                     request.getSession().setAttribute( "cats", 
                         ShowCatalogueProcessor.getAllCatalogues() );
                     request.getSession().setAttribute( "object", null );
-                    response.sendRedirect( request.getContextPath() + "/edit.jsp?" 
+                    response.sendRedirect( request.getContextPath() + "/index.jsp?" 
                         + request.getQueryString() );
                 } else {
                     if( request.getParameter( "id" ) == null ) {
@@ -81,7 +81,7 @@ public class ActionDipatcher extends HttpServlet {
                             sc.process( request );
                             request.getSession().setAttribute( "cats", 
                                 ShowCatalogueProcessor.getAllCatalogues() );
-                            response.sendRedirect( request.getContextPath() + "/edit.jsp?"
+                            response.sendRedirect( request.getContextPath() + "/index.jsp?"
                                 + request.getQueryString() );
                         }
                         
@@ -90,27 +90,36 @@ public class ActionDipatcher extends HttpServlet {
                             sc.process( request );
                             request.getSession().setAttribute( "cats", 
                                 ShowCatalogueProcessor.getAllCatalogues() );
-                            response.sendRedirect( request.getContextPath() + "/edit.jsp?"
+                            response.sendRedirect( request.getContextPath() + "/index.jsp?"
                                 + request.getQueryString() );
                         }
                         
                         if( request.getParameter( "act" ).equals( "delpic" ) ) {
                             IActionProcessor sc = new EditPictureProcessor();
                             sc.process( request );
-                            response.sendRedirect( request.getContextPath() + "/" );
+                            response.sendRedirect( request.getContextPath() + 
+                                "/?act=showcat&id=" + request.getSession().
+                                getAttribute( "returnID" ) );
                         }
                         
                         if( request.getParameter( "act" ).equals( "delcat" ) ) {
                             IActionProcessor sc = new EditCatalogueProcessor();
                             sc.process( request );
-                            response.sendRedirect( request.getContextPath() + "/" );
+                            response.sendRedirect( request.getContextPath() + 
+                                "/?act=showcat&id=" + request.getSession().
+                                getAttribute( "returnID" ) );
                         }
                     }
                 }
             }
         } catch ( DataAccessException ex ) {
-            request.getSession().setAttribute( "error", "Data access error: " + ex.toString() );
-            response.sendRedirect( request.getContextPath() + "/index.jsp" );
+            request.getSession().setAttribute( "error", "Data access error: " 
+                + ex.toString() );
+            //response.sendRedirect( request.getContextPath() + "/index.jsp?error" );
+            ServletContext context = getServletContext();
+            RequestDispatcher dispatcher = context.getRequestDispatcher( "/index.jsp?error" );
+            dispatcher.forward(request, response);
+
         }
     }
     
@@ -151,8 +160,6 @@ public class ActionDipatcher extends HttpServlet {
                 pic.setCatalogue( iqp.getRoot().getID() );
                 request.getSession().setAttribute( "uploadedpic", pic );
                 request.getSession().setAttribute( "target", "pic" );
-                /*request.getSession().setAttribute( "cats", 
-                    ShowCatalogueProcessor.getAllCatalogues() );*/
                 response.sendRedirect( request.getContextPath() + "/upload.jsp" );
             } catch ( PictureStorageException ex ) {
                 request.getSession().setAttribute( "error", "Data storing error: " + ex.toString() );

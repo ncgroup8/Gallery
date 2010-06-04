@@ -41,8 +41,12 @@ public class EditCatalogueProcessor implements IActionProcessor {
             }
             if( request.getParameter( "act" ).equals( "delcat" ) ) {
                 if( id != -1 ) {
+                    int parent = iqp.getCatalogueByID( id ).getParent();
                     iqp.delCatalogueByID( id );
-                    request.getSession().setAttribute( "error", "Catalogue deleted." );
+                    request.getSession().setAttribute( "returnID", 
+                        new Integer( parent ) );
+                } else {
+                    throw new DataAccessException( "Cant del specified catalogue." );
                 }
             }
         } else {

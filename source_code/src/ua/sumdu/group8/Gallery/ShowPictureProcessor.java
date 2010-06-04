@@ -33,6 +33,9 @@ public class ShowPictureProcessor implements IActionProcessor {
             }
             if( id != -1 ) {
                 IGalleryPicture pic = iqp.getPictureByID( id );
+                if( pic == null ) {
+                    throw new DataAccessException( "Picture you request not exist." );
+                }
                 request.getSession().setAttribute( "pic", pic );
                 List path = ShowCatalogueProcessor.getPath( pic.getCatalogue() );
                 request.getSession().setAttribute( "path", path );
