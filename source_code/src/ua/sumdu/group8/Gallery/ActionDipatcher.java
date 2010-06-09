@@ -115,11 +115,9 @@ public class ActionDipatcher extends HttpServlet {
         } catch ( DataAccessException ex ) {
             request.getSession().setAttribute( "error", "Data access error: " 
                 + ex.toString() );
-            //response.sendRedirect( request.getContextPath() + "/index.jsp?error" );
             ServletContext context = getServletContext();
             RequestDispatcher dispatcher = context.getRequestDispatcher( "/index.jsp?error" );
             dispatcher.forward(request, response);
-
         }
     }
     
@@ -144,7 +142,14 @@ public class ActionDipatcher extends HttpServlet {
                     IActionProcessor sc = new EditPictureProcessor();
                     sc.process( request );
                 }
-                response.sendRedirect( request.getContextPath() + "/" );
+                if( request.getSession().getAttribute( "returnID" ) == null ) {
+                    response.sendRedirect( request.getContextPath() + "/" );
+                } else {
+                    response.sendRedirect( request.getContextPath() + 
+                        "/?act=showcat&id=" + request.getSession().
+                        getAttribute( "returnID" ) );
+                }
+                request.getSession().setAttribute( "returnID", null );
             } catch ( DataAccessException ex ) {
                 request.getSession().setAttribute( "error", "Data access error: " + ex.toString() );
                 response.sendRedirect( request.getContextPath() + "/index.jsp" );

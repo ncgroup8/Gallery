@@ -72,6 +72,7 @@ public class EditCatalogueProcessor implements IActionProcessor {
                     iqp.addCatalogue( cat );
                 }
             }
+            request.getSession().setAttribute( "returnID", new Integer( parent ) );
         }
     }
 }

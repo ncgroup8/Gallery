@@ -83,6 +83,7 @@ public class EditPictureProcessor implements IActionProcessor {
                     iqp.addPicture( pic );
                 }
             }
+            request.getSession().setAttribute( "returnID", new Integer( cat ) );
         }
     }
 }
