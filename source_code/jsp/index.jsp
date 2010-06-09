@@ -125,6 +125,7 @@
                 targId = "&id=" + request.getParameter( "id" );
             }
         }
+        if( !isIncEdit && !session.getAttribute( "target" ).equals( "pic" ) ) {
 %>
 
 <tr>
@@ -141,6 +142,10 @@
         </table>
     </td>
 </tr>
+
+<%
+        }    
+%>
 
 <tr valign="top">
 <td class="tbl">

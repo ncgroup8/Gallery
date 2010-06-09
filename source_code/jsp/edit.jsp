@@ -53,6 +53,10 @@
             parent = cat.getParent();
             parentName = findCatolugueById( 
                 (List)session.getAttribute( "path" ), parent );
+        } else {
+            parent = catId;
+            parentName = findCatolugueById( 
+                (List)session.getAttribute( "path" ), catId );
         }
     } else {
         caption = "Picture";
@@ -67,6 +71,10 @@
             parent = pic.getCatalogue();
             parentName = findCatolugueById( 
                 (List)session.getAttribute( "cats" ), parent );
+        } else {
+            parent = catId;
+            parentName = findCatolugueById( 
+                (List)session.getAttribute( "path" ), catId );
         }
     }
 %>
@@ -113,9 +121,10 @@ onclick="showPopWin('upload.jsp', 400, 100, uploadpic);" value="select" />
 <tr><td align="right"><input value="Ok" type="button" onclick="send();" />
 </td><td>
 <input type="button" value="Cancel" 
-onclick="window.location.href='<%= session.getAttribute( "absolutePath" ) %>'" />
+onclick="window.location.href='<%= session.getAttribute( "absolutePath" ) + "/?act=showcat&id=" 
+%><%= parent %>'" />
 </td></tr>
-
+</table>
 </td>
 </tr></table>
 </form>

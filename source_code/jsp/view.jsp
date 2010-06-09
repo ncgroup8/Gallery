@@ -328,6 +328,19 @@ value="<%= ( ( IGalleryCatalogue )path.get( 0 ) ).getID() %>|<%= fullPath %>" />
 </td>
 </tr>
 
+<tr>
+<td>
+<table border="0">
+<tr><td><img src="img/edit.png" border="0"></td><td>
+<a href="<%= session.getAttribute( "absolutePath" ) %>/?act=editpic&id=<%= pic.getID() %>">[edit]</a></td><td width="10">
+</td><td><img src="img/del.png" border="0"></td><td>
+<a href="<%= session.getAttribute( "absolutePath" ) %>/?act=delpic&id=<%= pic.getID() %>">[del]</a></td><td>
+</tr>
+</table>
+</td>
+</tr>
+
+
 <%
     }
 %>
